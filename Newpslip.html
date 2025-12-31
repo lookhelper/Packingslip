@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Packing Slip | Saru Aikoh Chemicals Pvt. Ltd.</title>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+@page { size:A4; margin:12mm; }
+
+/* ===== GLOBAL ===== */
+body{
+  font-family: 'Segoe UI', Inter, Arial, sans-serif;
+  background: linear-gradient(135deg,#eef2f7,#f9fbfd);
+  margin:0;
+  color:#1f2937;
+}
+
+/* ===== HEADER STYLE ===== */
+.header-box{
+  text-align:center;
+  margin-bottom:25px;
+}
+.logo-text{
+  font-size:26px;
+  font-weight:700;
+  letter-spacing:1px;
+  color:#1e3a8a;
+}
+.title-text{
+  font-size:18px;
+  font-weight:600;
+  margin-top:4px;
+  color:#111827;
+}
+
+
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:20px;
+}
+
+/* ===== HEADINGS ===== */
+h2{
+  margin:0 0 10px;
+  font-weight:600;
+}
+
+/* ===== FORM CARD ===== */
+.card{
+  background:#fff;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  padding:20px;
+  margin-bottom:20px;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+}
+input,select{
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid #d1d5db;
+  font-size:14px;
+}
+input:focus,select:focus{
+  outline:none;
+  border-color:#2563eb;
+}
+
+/* ===== BUTTONS ===== */
+.actions{
+  margin-top:15px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+button{
+  padding:10px 16px;
+  border-radius:10px;
+  border:none;
+  font-weight:500;
+  cursor:pointer;
+  transition:.2s;
+}
+.primary{background:#2563eb;color:#fff}
+.primary:hover{background:#1e40af}
+.secondary{background:#6b7280;color:#fff}
+.secondary:hover{background:#4b5563}
+.excel{background:#16a34a;color:#fff}
+.excel:hover{background:#15803d}
+
+/* ===== OUTPUT AREA ===== */
+#printArea{margin-top:20px}
+
+/* ===== SLIP ===== */
+.slip{
+  position: relative;
+  background:#fff;
+  border-radius:14px;
+  border:2px dotted #494949;
+
+  /* 🔥 PERFECT A4 SIZE (3 slips) */
+  height: 80mm;
+  width: 100%;
+
+  padding: 10mm;
+  box-sizing: border-box;
+
+  margin-bottom: 6mm;
+  page-break-inside: avoid;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.slip:nth-child(3n){
+  page-break-after: always;
+}
+
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+}
+
+/* LEFT */
+.to-box{width:60%}
+.title{font-weight:600;color:#374151}
+.to-name{font-size:17px;font-weight:700}
+.to-company{font-size:13px;color:#6b7280}
+.to-address{
+  margin-top:8px;
+  padding:10px;
+  border-radius:10px;
+  border:1px dashed #cbd5e1;
+  font-size:13px;
+}
+
+/* RIGHT */
+.right-col{width:35%;text-align:right}
+.qr{display:flex;justify-content:flex-end;margin-bottom:6px}
+
+/* FROM BOX */
+.from-box{
+  border:1px dashed #cbd5e1;
+  border-radius:10px;
+  padding:10px;
+  font-size:12px;
+  text-align:left;
+}
+.from-box img{
+  height:30px;
+  display:block;
+  margin:6px auto 0;
+}
+
+/* WISH IMAGE */
+.wish-box{
+  position:absolute;
+  bottom:10px;
+  left:10px;
+}
+.wish-box img{
+  width:500px;
+  height:75px;
+  border-radius:10px;
+  object-fit:cover;
+  border:1px solid #e5e7eb;
+  display:flex;
+  justify-content:center; /* horizontal */
+  align-items:center;     /* vertical */
+}
+
+/* ===== DELETE BUTTON ===== */
+.delete-btn{
+  position:absolute;
+  top:10px;
+  right:10px;
+  background:#ef4444;
+  color:#fff;
+  border:none;
+  border-radius:50%;
+  width:28px;
+  height:28px;
+  font-size:16px;
+  cursor:pointer;
+  line-height:26px;
+}
+.delete-btn:hover{
+  background:#b91c1c;
+}
+
+/* ===== REMARKS ===== */
+.remarks-box{
+  margin-top:10px;
+  padding:8px 10px;
+  border-radius:8px;
+  background:#f8fafc;
+  border:1px dashed #cbd5e1;
+  font-size:13px;
+}
+.remarks-box b{
+  color:#374151;
+}
+
+
+/* ===== PRINT ===== */
+.print{
+  text-align:right;
+  margin-top:20px;
+}
+@media print{
+
+  body{
+    background:#fff;
+  }
+
+  /* ❌ UI hide */
+  .header-box,
+  .form-grid,
+  .actions,
+  .print,
+  .excel,
+  .history{
+    display:none !important;
+  }
+
+  /* ✅ Slip natural size me rahe */
+  #printArea{
+    margin:0;
+  }
+
+  .delete-btn{
+    display:none !important;
+  }
+}
+
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<!-- FORM -->
+<div class="header-box">
+  <div class="logo-text">SARU AIKOH</div>
+  <div class="title-text">Packing Slip Generator</div>
+<br>
+<br>
+<br>
+
+  <div class="form-grid">
+    <select id="title"><option>Mr.</option><option>Mrs.</option><option>M/S</option></select>
+    <input id="name" placeholder="Customer Name">
+    <input id="company" placeholder="Company">
+<input 
+  id="phone"
+  placeholder="Phone"
+  type="tel"
+  inputmode="numeric"
+  pattern="[0-9]*"
+  oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+>
+    <input id="address" placeholder="Address">
+    <input id="pincode" placeholder="Pincode (Automatic)" onkeyup="fetchCityState(this.value)">
+    <input id="city" placeholder="City / State">
+    <input id="sender" placeholder="Sender Name (optional)">
+
+    <input id="designation" placeholder="Designation (optional)">
+    <input id="senderphone" placeholder="Sender Phone">
+    <input id="remarks" placeholder="Remarks (optional)">
+    <input type="file" id="wishImage" accept="image/*">
+  </div>
+
+  <div class="actions">
+    <button class="primary" onclick="generateSlip()">Add Slip</button>
+    <button class="secondary" onclick="loadLastForm()">Load Last</button>
+
+    <select id="historySelect" class="history" onchange="loadFromHistory()">
+      <option value="">Last 5 Entries</option>
+    </select>
+
+
+    <input type="file" class="excel" id="excelFile" accept=".xlsx,.xls">
+    <button class="excel" onclick="importExcel()">Import Excel</button>
+    <button class="excel" onclick="downloadTemplate()">Download Excel Template</button>
+  </div>
+
+</div>
+
+<!-- OUTPUT -->
+<div id="printArea"></div>
+
+<div class="print">
+  <button class="primary" onclick="window.print()">Print / Save PDF</button>
+</div>
+
+</div>
+
+<script>
+/* ==== STORAGE ==== */
+const LAST_KEY="saru_last_form";
+const HISTORY_KEY="saru_form_history";
+let history=JSON.parse(localStorage.getItem(HISTORY_KEY))||[];
+
+function v(id){return document.getElementById(id).value.trim()}
+function todayKey(){return "saru_"+new Date().toISOString().slice(0,10)}
+
+function generateSlip(data=null){
+  let d=data||{
+  title:v('title'),
+  name:v('name'),
+  company:v('company'),
+  address:v('address'),
+  city:v('city'),
+  pincode:v('pincode'),
+  phone:v('phone'),
+  sender:v('sender'),
+  designation:v('designation'),
+  senderphone:v('senderphone'),
+  remarks:v('remarks')   // ✅ ADD
+};
+
+  if(!d.name||!d.phone||!d.senderphone){alert("Required fields missing");return}
+
+  localStorage.setItem(LAST_KEY,JSON.stringify(d));
+
+
+  // Save recent entries (no date filter)
+history.unshift(d);
+history = history.slice(0,10); // last 10 entries (change if needed)
+localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+updateHistory();
+
+
+  const slip=document.createElement("div");
+  slip.className="slip";
+  slip.innerHTML=`
+  <button class="delete-btn" onclick="deleteSlip(this)">×</button>
+  <div class="top">
+
+    <div class="to-box">
+      <div class="title">To</div>
+      <div class="to-name">${d.title} ${d.name}</div>
+      <div class="to-company">${d.company}</div>
+      <div class="to-address">
+        ${d.address}<br>${d.city}<br>
+        <b>Pincode:</b> ${d.pincode}<br>
+        <b>Phone:</b> ${d.phone}
+      </div>
+      ${d.remarks ? `
+  <div class="remarks-box">
+    <b>Remarks:</b> ${d.remarks}
+  </div>
+` : ``}
+    </div>
+    <div class="right-col">
+      <div class="qr"></div>
+      <div class="from-box">
+        <b>From</b><br>
+        ${d.sender||""}<br>
+        ${d.designation||""}<br>
+        <b>Saru Aikoh Chemicals Pvt. Ltd.</b><br>
+        A-2 Industrial Estate, Partapur, Meerut, Uttar Pradesh<br>
+        Pincode : 250103 <br>
+        <b>Ph:</b> ${d.senderphone}
+      </div>
+    </div>
+  </div>
+  <div class="wish-box"></div>
+  `;
+  printArea.appendChild(slip);
+
+  new QRCode(slip.querySelector(".qr"),{
+    text:`${d.name} | ${d.company} | ${d.phone}`,
+    width:85,height:85
+  });
+
+  let f=wishImage.files[0];
+  if(f){
+    let r=new FileReader();
+    r.onload=e=>slip.querySelector(".wish-box").innerHTML=`<img src="${e.target.result}">`;
+    r.readAsDataURL(f);
+  }
+
+    // ✅ Google Sheet me save karna hai ya nahi – user se poochho
+  if (confirm("Do you want to save this packing slip to Google Sheet?")) {
+  saveToGoogleSheet(d);
+}
+}
+
+
+
+function saveToGoogleSheet(d){
+  alert("Trying to save to Google Sheet"); // debug ke liye
+
+  const formData = new URLSearchParams();
+  for(let k in d){
+    formData.append(k, d[k] || "");
+  }
+
+  fetch("https://script.google.com/macros/s/AKfycbyTk_VoR-2ejrhwN_dLcQS88afV_vKO7yjYs19ilyN9wY_Q2vpq8muTNwEcmw_YR5O1NQ/exec", {
+    method:"POST",
+    body:formData
+  });
+}
+
+
+
+function loadLastForm(){
+  let d=JSON.parse(localStorage.getItem(LAST_KEY));
+  if(!d)return;
+  fillForm(d);
+}
+function fillForm(d){
+  // FIX for select dropdown
+  const titleSelect = document.getElementById("title");
+  [...titleSelect.options].forEach(opt=>{
+    if(opt.value === d.title){
+      titleSelect.value = d.title;
+    }
+  });
+
+  document.getElementById("name").value = d.name || "";
+  document.getElementById("company").value = d.company || "";
+  document.getElementById("address").value = d.address || "";
+  document.getElementById("city").value = d.city || "";
+  document.getElementById("pincode").value = d.pincode || "";
+  document.getElementById("phone").value = d.phone || "";
+  document.getElementById("sender").value = d.sender || "";
+  document.getElementById("designation").value = d.designation || "";
+  document.getElementById("senderphone").value = d.senderphone || "";
+  document.getElementById("remarks").value = d.remarks || "";
+
+}
+
+
+function updateHistory(){
+  historySelect.innerHTML='<option value="">Last 10 Entries</option>';
+  history.forEach((d,i)=>{
+    historySelect.innerHTML+=`<option value="${i}">${d.name} - ${d.phone}</option>`;
+  });
+}
+function loadFromHistory(){
+  let i=historySelect.value;
+  if(i==="")return;
+  fillForm(history[i]);
+}
+
+
+function importExcel(){
+  let f=excelFile.files[0];
+  if(!f)return;
+  let r=new FileReader();
+  r.onload=e=>{
+    let wb=XLSX.read(new Uint8Array(e.target.result),{type:"array"});
+    XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]])
+      .forEach(row=>generateSlip({
+        title:row.Title||"Mr.",
+        name:row.Name||"",
+        company:row.Company||"",
+        address:row.Address||"",
+        city:row.City||"",
+        pincode:row.Pincode||"",
+        phone:row.Phone||"",
+        sender:row.Sender||"",
+        designation:row.Designation||"",
+        senderphone:row.SenderPhone||""
+      }));
+  };
+  r.readAsArrayBuffer(f);
+}
+
+updateHistory();
+
+function deleteSlip(btn){
+  if(confirm("Are you sure you want to delete this packing slip?")){
+    btn.closest(".slip").remove();
+  }
+}
+
+function fetchCityState(pincode){
+
+  // sirf 6 digit par hi API call
+  if(pincode.length !== 6) return;
+
+  fetch("https://api.postalpincode.in/pincode/" + pincode)
+    .then(res => res.json())
+    .then(data => {
+
+      if(data[0].Status !== "Success"){
+        alert("Invalid Pincode");
+        document.getElementById("city").value = "";
+        return;
+      }
+
+      const postOffice = data[0].PostOffice[0];
+
+      const city = postOffice.District;
+      const state = postOffice.State;
+
+      // City / State field auto fill
+      document.getElementById("city").value = city + ", " + state;
+    })
+    .catch(err => {
+      console.error("Pincode API Error", err);
+    });
+}
+
+function downloadTemplate(){
+  const wb = XLSX.utils.book_new();
+
+  const data = [[
+    "Title",
+    "Customer Name",
+    "Company",
+    "Address",
+    "City",
+    "Pincode",
+    "Phone",
+    "Sender",
+    "Designation",
+    "Sender Phone",
+    "Remarks"
+  ]];
+  
+
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  XLSX.utils.book_append_sheet(wb, ws, "Packing Slip Template");
+
+  XLSX.writeFile(wb, "Packing_Slip_Template.xlsx");
+}
+
+
+
+
+</script>
+
+</body>
+</html>
